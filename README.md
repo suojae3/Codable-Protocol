@@ -45,23 +45,25 @@ if let savedData = UserDefaults.standard.data(forKey: "toDoItems"),
 }
 ```
 ```swift
-// Codable 프로토콜을 채택했을 경우
+//Dictionary를 사용할 경우
 
-//struct를 통한 데이터 관리
-struct ToDoItem: Codable {
-    let title: String
+// Dictionary로 todo item 관리
+var itemsArray: [[String: String]] = []
+for item in toDoItems {
+    itemsArray.append(["title": item.title])
 }
 
-var toDoItems = TodDoItem()
+// Userdefaults에 배열 저장하기
+UserDefaults.standard.set(itemsArray, forKey: "toDoItems")
 
-// Encoding 
-if let encodedData = try? JSONEncoder().encode(toDoItems) {
-    UserDefaults.standard.set(encodedData, forKey: "toDoItems")
-}
-
-// Decoding 
-if let savedData = UserDefaults.standard.data(forKey: "toDoItems"),
-   let decodedItems = try? JSONDecoder().decode([ToDoItem].self, from: savedData) {
-    toDoItems = decodedItems
+// UserDefaults 딕셔너리로부터 데이터 가져오기
+if let itemsArray = UserDefaults.standard.array(forKey: "toDoItems") as? [[String: String]] {
+    // Convert each dictionary to a ToDoItem
+    toDoItems = itemsArray.compactMap { dict in
+        if let title = dict["title"] {
+            return ToDoItem(title: title)
+        }
+        return nil
+    }
 }
 ```
